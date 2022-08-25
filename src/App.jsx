@@ -22,8 +22,8 @@ Amplify.configure({
     oauth: {
       domain: process.env.REACT_APP_COGNITO_USERPOOL_DOMAIN,
       scope: ["phone", "email", "profile", "openid"],
-      redirectSignIn: "http://localhost:3000/",
-      redirectSignOut: "http://localhost:3000/",
+      redirectSignIn: "https://store-imoto.vercel.app/",
+      redirectSignOut: "https://store-imoto.vercel.app/",
       responseType: "token",
     },
   },
