@@ -80,7 +80,9 @@ const HomeScreenSlider = () => {
       className={
         sellerConfigs.UserInfo.enableEditing
           ? `edit-box ${IS_DELETED ? "deleted-edit-box" : "primary-edit-box"}`
-          : "container"
+          : sellerConfigs.Theme.IsContained
+          ? "container"
+          : ""
       }
     >
       <EditBoxStrip isDeleted={IS_DELETED} />
@@ -96,52 +98,24 @@ const HomeScreenSlider = () => {
       )}
 
       <div
-        className={sellerConfigs.Theme.IsContained ? "container" : ""}
         style={{
-          padding: 0,
-          width:'100%'
+          width: "100%",
+          minHeight: 345,
+          opacity: IS_DELETED ? 0.7 : 1,
+          pointerEvents: IS_DELETED ? "none" : "auto",
+          position: "relative",
         }}
       >
-        <div
-          style={{
-            width: "100%",
-            minHeight: 345,
-            opacity: IS_DELETED ? 0.7 : 1,
-            pointerEvents: IS_DELETED ? "none" : "auto",
-            position: "relative",
-          }}
-        >
-          {orderdSlides.length ? (
-            <Carousel
-              addClass="home-slider owl-carousel owl-theme owl-carousel-lazy show-nav-hover nav-big mb-0 text-uppercase"
-              settings={owlSetting4}
-            >
-              {orderdSlides.map((slide) => {
-                if (slide.hyperlink) {
-                  return (
-                    <div
-                      className="home-slide home-slide1 banner"
-                      key={uuidv4()}
-                    >
-                      <Link to={slide.hyperlink}>
-                        <img
-                          className="owl-lazy slide-bg"
-                          src={`${process.env.PUBLIC_URL}/assets/images/demo/lazy.png`}
-                          data-src={slide.img}
-                          alt="slider"
-                          style={{
-                            minHeight: 345,
-                          }}
-                        />
-                      </Link>
-                    </div>
-                  );
-                } else {
-                  return (
-                    <div
-                      className="home-slide home-slide1 banner"
-                      key={uuidv4()}
-                    >
+        {orderdSlides.length ? (
+          <Carousel
+            addClass="home-slider owl-carousel owl-theme owl-carousel-lazy show-nav-hover nav-big mb-0 text-uppercase"
+            settings={owlSetting4}
+          >
+            {orderdSlides.map((slide) => {
+              if (slide.hyperlink) {
+                return (
+                  <div className="home-slide home-slide1 banner" key={uuidv4()}>
+                    <Link to={slide.hyperlink}>
                       <img
                         className="owl-lazy slide-bg"
                         src={`${process.env.PUBLIC_URL}/assets/images/demo/lazy.png`}
@@ -151,61 +125,75 @@ const HomeScreenSlider = () => {
                           minHeight: 345,
                         }}
                       />
-                    </div>
-                  );
-                }
-              })}
-            </Carousel>
-          ) : (
-            <div
+                    </Link>
+                  </div>
+                );
+              } else {
+                return (
+                  <div className="home-slide home-slide1 banner" key={uuidv4()}>
+                    <img
+                      className="owl-lazy slide-bg"
+                      src={`${process.env.PUBLIC_URL}/assets/images/demo/lazy.png`}
+                      data-src={slide.img}
+                      alt="slider"
+                      style={{
+                        minHeight: 345,
+                      }}
+                    />
+                  </div>
+                );
+              }
+            })}
+          </Carousel>
+        ) : (
+          <div
+            style={{
+              minHeight: 345,
+              height: "100%",
+              width: "100%",
+              background: "#f4f4f4",
+              border: "1px #90999d29 solid",
+              position: "absolute",
+              top: 0,
+              left: 0,
+              zIndex: 10,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              flexDirection: "column",
+            }}
+          >
+            <button
+              className="btn btn-outline-secondary"
               style={{
-                minHeight: 345,
-                height: "100%",
-                width: "100%",
-                background: "#f4f4f4",
-                border: "1px #90999d29 solid",
-                position: "absolute",
-                top: 0,
-                left: 0,
-                zIndex: 10,
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                flexDirection: "column",
+                padding: 0,
+                height: 50,
+                width: 50,
+              }}
+              title="Click to add a new banner image to carousel"
+              onClick={handleOpenSlideAdder}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="22"
+                fill="currentColor"
+                className="bi bi-plus"
+                viewBox="0 0 16 16"
+              >
+                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z" />
+              </svg>
+            </button>
+
+            <h6
+              style={{
+                marginTop: 10,
               }}
             >
-              <button
-                className="btn btn-outline-secondary"
-                style={{
-                  padding: 0,
-                  height: 50,
-                  width: 50,
-                }}
-                title="Click to add a new banner image to carousel"
-                onClick={handleOpenSlideAdder}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="22"
-                  height="22"
-                  fill="currentColor"
-                  className="bi bi-plus"
-                  viewBox="0 0 16 16"
-                >
-                  <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z" />
-                </svg>
-              </button>
-
-              <h6
-                style={{
-                  marginTop: 10,
-                }}
-              >
-                Click to add a new banner image to carousel
-              </h6>
-            </div>
-          )}
-        </div>
+              Click to add a new banner image to carousel
+            </h6>
+          </div>
+        )}
       </div>
 
       {openSlidesEditor && (

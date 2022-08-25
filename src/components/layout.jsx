@@ -26,10 +26,13 @@ import { setNotifications, setNotificationWorker } from "../action";
 
 function Layout(props) {
   const { sellerConfigs } = useSellerConfig();
-  const { workersState, workersStateDispatch} = useContext(NotificationAndDatabaseContext);
+  const { workersState, workersStateDispatch } = useContext(
+    NotificationAndDatabaseContext
+  );
   const [prevPath, setPrevPath] = useState("");
 
-  let thisWorker = workersState.notificationWorker, matchedCount = 0;
+  let thisWorker = workersState.notificationWorker,
+    matchedCount = 0;
   const currentTheme = Number(sellerConfigs.Theme.Template);
 
   //--------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -51,7 +54,7 @@ function Layout(props) {
       } catch (error) {
         toast.error("User Not signed in");
       }
-    }
+    };
 
     // setup new worker iff it doesnt exist in the global state and then
     // set up  messages listeners.
@@ -62,7 +65,7 @@ function Layout(props) {
       thisWorker.onmessage = (e) => {
         // we have notifications, so send to notification context and all listeners will pick it up
         if (e && e.data && e.data.status === 200 && e.data.notifications) {
-          workersStateDispatch(setNotifications(e.data.notifications))
+          workersStateDispatch(setNotifications(e.data.notifications));
           console.log("[1] MSG Recieved: ", e.data.notifications);
         } else if (e && e.data && e.data.msg === "isOnline") {
           // If worker wants to know if we are online, then post message back
@@ -84,7 +87,7 @@ function Layout(props) {
     }
   }, []);
   //--------------------------------------------------------------------------------------------------------------------------------------------------------
-  
+
   const CloseButton = ({ YouCanPassAnyProps, closeToast }) => (
     <i
       className="icon-cancel"
@@ -176,19 +179,22 @@ function Layout(props) {
         />
       </Helmet>
 
-      <div className="porto"
-         style = {{
+      <div
+        className="porto"
+        style={{
           background: sellerConfigs.Theme.ColorPalette["Body"],
-          color: sellerConfigs.Theme.ColorPalette["Gray-20"]
-         }}
-         >
+          color: sellerConfigs.Theme.ColorPalette["Gray-20"],
+        }}
+      >
         <div className="page-wrapper">
           <TopNotice />
           <Theme />
           {props.children}
           <Footer />
         </div>
-        <ThemingWidget />
+
+        {sellerConfigs.UserInfo.enableEditing && <ThemingWidget />}
+        
         <MobileMenu />
         <AddToCartModal />
         <QuickModal />
