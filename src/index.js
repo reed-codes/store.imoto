@@ -45,6 +45,8 @@ export function Root() {
     localStorage.setItem("redirect-payload", JSON.stringify(redirectPayload));
   }
 
+  console.log("redirect is ",`https://store.imoto.parts/`)
+  
   Hub.listen("auth", ({ payload: { event, data } }) => {
     switch (event) {
       case "signIn":
