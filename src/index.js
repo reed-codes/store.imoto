@@ -48,21 +48,21 @@ export function Root() {
   Hub.listen("auth", ({ payload: { event, data } }) => {
     switch (event) {
       case "signIn":
-        console.log("data", data);
+        console.log("signed in - ", data);
         break;
 
       case "customOAuthState":
-        const authState = JSON.parse(data);
-        const authRedirectPayload = JSON.parse(
-          localStorage.getItem("redirect-payload")
-        );
-        const sellerWebsiteURL = `${authState.sourceURL}/${authRedirectPayload.hash}`;
+        // const authState = JSON.parse(data);
+        // const authRedirectPayload = JSON.parse(
+        //   localStorage.getItem("redirect-payload")
+        // );
+        // const sellerWebsiteURL = `${authState.sourceURL}/${authRedirectPayload.hash}`;
 
         console.log("sellerWebsiteURL", sellerWebsiteURL);
 
-        if (authRedirectPayload.hash.includes("access_token")) {
-          window.location.reload(sellerWebsiteURL);
-        }
+        // if (authRedirectPayload.hash.includes("access_token")) {
+        //   window.location.reload(sellerWebsiteURL);
+        // }
         break;
     }
   });
