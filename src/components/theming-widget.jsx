@@ -115,7 +115,6 @@ const ThemingWidget = () => {
       };
       setColors(newColorObject);
     } else {
-      console.log("color change attribute missing");
     }
   };
 

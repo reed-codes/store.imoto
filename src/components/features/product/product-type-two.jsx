@@ -3,21 +3,55 @@ import { Link } from "react-router-dom";
 
 import { findIndex , findCartIndex } from "../../../utils";
 import { addToCart, addToWishList, showQuickView } from "../../../action";
+import { useSellerConfig } from "../../../store/sellerConfigContext";
+import { addListItemToList } from "../../../api";
 
-import { CartListContext } from "../../../store/CartListContext";
-import { WishlistContext } from "../../../store/WishlistContext";
 import { PricelistContext } from "../../../store/PricelistContext";
 import { CartWishListContext } from "../../../store/CartWishlistContext";
+import { toast } from "react-toastify";
 
 function ProductTypeTwo(props) {
-  const { cartWishList,
-    cartWishListDispach } = useContext(CartWishListContext);
+  const { cartWishList, cartWishListDispach } = useContext(CartWishListContext);
+  const { sellerConfigs } = useSellerConfig();
   const { pricelistDispach } = useContext(PricelistContext);
   let isInWishlist = props.product ? findCartIndex(cartWishList.wishlist, props.product.ProductID) ? true : false : false;
 
   let { addClass, product } = props;
   let hasWishIcon = true;
 
+  let listItem = {
+    ProductID: product.ProductID,
+    Quantity: 1,
+    ProductInfo: product,
+  };
+  
+  let listName = "cart"
+  const addToCartHandler = async () => {
+    addToCart(product, 1, cartWishListDispach);
+    const apiReponse = await addListItemToList(sellerConfigs.SellerID, listName, listItem);
+  };
+  const handleAddToCart = async () => {
+    let listItem = {
+      ProductID: product.ProductID,
+      Quantity: 1,
+    };
+    // specify the listname that you going to add item to.
+    cartWishList.cart.filter((item, index) => {
+      if (product.ProductID === item.ProductID) {
+        listItem.Quantity = item.Quantity + 1
+      }
+    })
+
+    // reducer
+    cartWishListDispach(addToCart(product, 1));
+
+    // api call
+    const [, addToCartError] = await addListItemToList(sellerConfigs.SellerID, "cart", listItem);
+
+    if (addToCartError !== null) {
+      toast.error(addToCartError)
+    }
+  };
   const onWishlistClick = (e) => {
     if (!isInWishlist) {
       e.preventDefault();
@@ -60,7 +94,7 @@ function ProductTypeTwo(props) {
             className="btn-icon btn-add-cart"
             data-toggle="modal"
             data-target="#addCartModal"
-            onClick={() => addToCart(product, 1, cartWishListDispach)}
+            onClick={handleAddToCart}
             title="Add to Cart"
           >
             <i className="icon-bag"></i>

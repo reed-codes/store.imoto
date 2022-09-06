@@ -98,7 +98,11 @@ const SigninModal = (props) => {
       // infomarion.
       localStorage.setItem("REQUESTED-PATH", window.location.pathname);
       localStorage.setItem("REDIRECT", "SIGN-UP");
-      await Auth.federatedSignIn({ provider: method });
+
+      await Auth.federatedSignIn({
+        provider: method,
+        customState: JSON.stringify({sourceURL: window.location.origin + '/' }),
+      });
     } catch (error) {
       localStorage.removeItem("REQUESTED-PATH");
       setAlert({
@@ -205,7 +209,7 @@ const SigninModal = (props) => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                gap:'4px'
+                gap: "4px",
               }}
               onClick={(_) => handleFederatedSigninClicked("Google")}
               className="btn btn-social-login btn-md btn-gplus mb-1"
@@ -214,7 +218,7 @@ const SigninModal = (props) => {
                 xmlns="http://www.w3.org/2000/svg"
                 width="14"
                 height="14"
-                style = {{marginBottom:'1px'}}
+                style={{ marginBottom: "1px" }}
                 fill="#fff"
                 className="bi bi-google"
                 viewBox="0 0 16 16"
@@ -229,7 +233,7 @@ const SigninModal = (props) => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                gap:'4px'
+                gap: "4px",
               }}
               onClick={(_) => handleFederatedSigninClicked("Facebook")}
               className="btn btn-social-login btn-md btn-facebook mb-1"
@@ -238,7 +242,7 @@ const SigninModal = (props) => {
                 xmlns="http://www.w3.org/2000/svg"
                 width="14"
                 height="14"
-                style = {{marginBottom:'1px'}}
+                style={{ marginBottom: "1px" }}
                 fill="#fff"
                 className="bi bi-facebook"
                 viewBox="0 0 16 16"
@@ -254,7 +258,7 @@ const SigninModal = (props) => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                gap:'4px',
+                gap: "4px",
                 background: "#08C",
               }}
               onClick={(_) =>
@@ -266,7 +270,7 @@ const SigninModal = (props) => {
                 xmlns="http://www.w3.org/2000/svg"
                 width="14"
                 height="14"
-                style = {{marginBottom:'1px'}}
+                style={{ marginBottom: "1px" }}
                 fill="#fff"
                 className="bi bi-key-fill"
                 viewBox="0 0 16 16"

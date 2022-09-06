@@ -14,13 +14,11 @@ export const notificationsAndDatabaseReducer = (state=initialNotificationAndData
   switch (action.type) {
     // set notifications
     case SET_NOTIFICATIONS:
-      console.log("SET_NOTIFICATIONS:");
       let { notifications } = state;
       if (Array.isArray(action.payload)) {
         notifications = action.payload;
         // now see if we must realod local orders
 
-        console.log("GET_NOTIFICATIONS: ", notifications);
         // TODO: include the Database worker functionality.
         // dbWorker.postMessage({
         //   msg: "GET_NOTIFICATIONS",

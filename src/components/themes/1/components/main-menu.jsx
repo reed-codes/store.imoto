@@ -22,6 +22,7 @@ const MainMenu = (props) => {
   };
 
   return (
+
     <nav className="main-nav w-100">
       <ul
         className="menu sf-arrows"
@@ -47,6 +48,7 @@ const RenderLevel = ({ children, handleCategoriesClick }) => {
   return children.map((category, index) => {
     if (category.children && category.children.length > 0) {
       return (
+
         <li
           key={index}
           style={{
@@ -64,13 +66,14 @@ const RenderLevel = ({ children, handleCategoriesClick }) => {
           >
             {category.Name}
           </MainNavTab>
+
           <ul
             className="sub-menu"
             style={{
               background: sellerConfigs.Theme.ColorPalette["Body"],
             }}
           >
-            <RenderLevel children={category.children} />
+            <RenderLevel children={category.children} handleCategoriesClick={handleCategoriesClick} />
           </ul>
         </li>
       );

@@ -52,7 +52,7 @@ function CartMenu(props) {
     // on success alert tyhe user
 
     event.preventDefault();
-    removeFromCart(item, cartWishListDispach);
+    cartWishListDispach(removeFromCart(item));
     toast.info("Cart Cleared");
   };
   

@@ -66,14 +66,12 @@ function Layout(props) {
         // we have notifications, so send to notification context and all listeners will pick it up
         if (e && e.data && e.data.status === 200 && e.data.notifications) {
           workersStateDispatch(setNotifications(e.data.notifications));
-          console.log("[1] MSG Recieved: ", e.data.notifications);
         } else if (e && e.data && e.data.msg === "isOnline") {
           // If worker wants to know if we are online, then post message back
           thisWorker.postMessage({
             msg: "onlineStatus",
             online: navigator.onLine,
           });
-          console.log("[2] ONLINE STATUS: ", e.data.msg);
         } else {
           toast.error("Error getting user's messages");
           console.error("[3] onMessage Error");

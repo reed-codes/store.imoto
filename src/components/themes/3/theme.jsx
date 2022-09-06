@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect , useContext } from "react";
+import { CartWishListContext } from "../../../store/CartWishlistContext";
+
 import { Link } from "react-router-dom";
+import { useSellerConfig } from "../../../store/sellerConfigContext";
 import { Auth } from "aws-amplify";
 
 import CartMenu from "./components/cart-menu";
 import MainMenu from "./components/main-menu";
 import SearchForm from "./components/search-form";
-import { adjustColorBrightness, isIEBrowser } from "../../../utils";
+import { isIEBrowser , getQtyTotal, adjustColorBrightness} from "../../../utils";
 
 import { setOpenAuthenticationModal } from "../../../action";
-import { useSellerConfig } from "../../../store/sellerConfigContext";
 
 import styled from "styled-components";
 
@@ -35,7 +37,12 @@ const AnchorIconButton = styled.a`
 
 function ThemeThree(props) {
   const IS_HOME_SCREEN = window.location.pathname === "/";
+
+  const { cartWishList, cartWishListDispach } = useContext(CartWishListContext);
   const { sellerConfigs, sellerConfigDispatch } = useSellerConfig();
+
+  const wishlistItems = cartWishList.wishlist ? cartWishList.wishlist : [];
+
   const [cognitoUserName, setCognitoUserName] = useState("");
 
   useEffect(() => {
@@ -50,6 +57,7 @@ function ThemeThree(props) {
 
     checkAuth();
   }, []);
+
 
   function handleClick(e) {
     e.preventDefault();
@@ -197,7 +205,20 @@ function ThemeThree(props) {
               color={sellerConfigs.Theme.ColorPalette["Gray-10"]}
             >
               <i className="icon-wishlist-2"></i>
+
+              <span
+                className="cart-count badge-circle"
+                style={{
+                  background: sellerConfigs.Theme.ColorPalette["Quaternary"],
+                  color: sellerConfigs.Theme.ColorPalette["White"],
+                }}
+              >
+                {getQtyTotal(wishlistItems)}
+              </span>
+
+
             </AnchorIconButton>
+
 
             <SearchForm
               addClass="header-search-popup header-search-category d-none d-sm-block"

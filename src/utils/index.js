@@ -229,11 +229,15 @@ export function findIndex(items = [], id) {
     return res;
 }
 
-
+/**
+ * find item of array
+ * @param { Array } items 
+ * @param { Int } id 
+ */
 export function findCartIndex(items = [], id) {
     let res = false;
     for (let i = 0; i < items.length; i++) {
-        if (items[i].productInfo.ProductID === id) {
+        if (items[i].ProductID === id) {
             res = true;
             break;
         }
@@ -826,7 +830,7 @@ export const getCartTotal = items => {
     let total = 0;
     if (items) {
         for (let i = 0; i < items.length; i++) {
-            total += parseInt(items[i].sum, 10);
+            total = total + (parseInt(items[i].ProductInfo.Price, 10) * Number(items[i].Quantity) );
         }
     }
     return total;
@@ -841,7 +845,7 @@ export const getQtyTotal = items => {
     let total = 0;
     if (items) {
         for (let i = 0; i < items.length; i++) {
-            total += parseInt(items[i].qty, 10);
+            total += parseInt(items[i].Quantity, 10);
         }
     }
     return total;
@@ -872,7 +876,7 @@ export const getPricelist = async (SellerID, searchString = "1", page = 0, count
         return [sellerPricelist, sellerCategories]
 
     } catch (err) {
-        console.log(err.message)
+        console.error(err.message)
         return []
     }
 }
@@ -889,7 +893,7 @@ export const getPricelistByCategory = async (SellerID, cat, page = 0, count = 1)
         if (sellerPricelist) return sellerPricelist
         else throw { message: "pricelist returned as null : " + String(sellerPricelist) }
     } catch (err) {
-        console.log(err.message)
+        console.error(err.message)
         return []
     }
 }
@@ -1101,7 +1105,6 @@ export const getAlteredStructuredCategories = (allCategories, filteredCategories
    * @param {string} fileType
    */
 const handleFileUploadUsingPresignedURL = async (uploadURL, file, fileType, updateProgress) => {
-console.log("UPLOADING...")
 const _ = await axios.put(uploadURL, file, {
     headers: {
     'Content-Type': fileType
@@ -1115,7 +1118,6 @@ const _ = await axios.put(uploadURL, file, {
             console.log("percentage", percentage)
     }
 })
-    console.log("UPLOAD SUCCESSFULLY")
     return true
 };
 

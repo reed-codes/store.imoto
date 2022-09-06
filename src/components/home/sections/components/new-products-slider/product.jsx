@@ -1,17 +1,16 @@
 import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 import { LazyLoadImage } from "react-lazy-load-image-component";
-
-import { addToCart, addToWishList, showQuickView } from "../../../../../action";
+import { addListItemToList } from "../../../../../api";
+import { addToCart, addToWishList, showCartModal, showQuickView } from "../../../../../action";
 import { adjustColorBrightness, findCartIndex } from "../../../../../utils";
 
-import { WishlistContext } from "../../../../../store/WishlistContext";
 import { PricelistContext } from "../../../../../store/PricelistContext";
-import { CartListContext } from "../../../../../store/CartListContext";
 import { CartWishListContext } from "../../../../../store/CartWishlistContext";
 
 import { useSellerConfig } from "../../../../../store/sellerConfigContext";
 import styled from "styled-components";
+import { toast } from "react-toastify";
 
 const ProductAnchor = styled.a`
   cursor: pointer;
@@ -30,7 +29,7 @@ const AddToCartButton = styled.button`
     color: ${(props) => props.hoverTextColor} !important;
     filter: brightness(90%);
     border-color: ${(props) =>
-      adjustColorBrightness(props.backgroundColor, -25)} !important;
+    adjustColorBrightness(props.backgroundColor, -25)} !important;
   }
 `;
 
@@ -46,26 +45,70 @@ const AnchorIconButton = styled.a`
   }
 `;
 
-function Product(props) {
-  const {  cartWishList, cartWishListDispach } = useContext(CartWishListContext);
+const Product = (props) => {
+  const { cartWishList, cartWishListDispach } = useContext(CartWishListContext);
   const { pricelistDispach } = useContext(PricelistContext);
   const { sellerConfigs } = useSellerConfig();
-  const { cartDispach } = useContext(CartListContext);
-  let isInWishlist = props.product ? findCartIndex(cartWishList.wishlist, props.product.ProductID) ? true : false : false;
 
-  // console.log(isInWishlist , "isInWishlist")
+  let isInWishlist = false;
+  if (props.product) {
+    if (findCartIndex(cartWishList.wishlist, props.product.ProductID)) {
+      isInWishlist = true
+    } else {
+      isInWishlist = false
+    }
+  } else {
+    isInWishlist = false
+  }
+
   let { link = "default", noAction = false, product } = props;
 
-  const onWishlistClick = (e) => {
-    isInWishlist = props.product
-      ? findCartIndex(cartWishList.list, props.product.ProductID)
-        ? true
-        : false
-      : false;
+  const handleAddToCart = async () => {
+    let listItem = {
+      ProductID: product.ProductID,
+      Quantity: 1,
+    };
+    // specify the listname that you going to add item to.
+    cartWishList.cart.filter((item, index) => {
+      if (product.ProductID === item.ProductID) {
+        listItem.Quantity = item.Quantity + 1
+      }
+    })
 
-    if (!isInWishlist) {
-      e.preventDefault();
+    // reducer
+    cartWishListDispach(addToCart(product, 1));
+    cartWishListDispach(showCartModal(product));
+
+    // api call
+    const [, addToCartError] = await addListItemToList(sellerConfigs.SellerID, "cart", listItem);
+
+    if (addToCartError !== null) {
+      toast.error(addToCartError)
+    }
+  };
+
+  const handleAddToWishlist = async (e) => {
+    let listItem = {
+      ProductID: product.ProductID,
+      Quantity: 1,
+    };
+
+    e.preventDefault()
+    if (findCartIndex(cartWishList.wishlist, props.product.ProductID)) {
+      // update the boolean value to fill the wishlist icon with the color
+      isInWishlist = true;
+    } else {
+      // update the boolean value to fill the wishlist icon with the color
+      isInWishlist = false;
       cartWishListDispach(addToWishList(product));
+      //  make api call here
+      const [, addToWishlistError] = await addListItemToList(sellerConfigs.SellerID, "cart", listItem);
+
+      if (addToWishlistError !== null) {
+        toast.success("Added product to wishlist.")
+      } else {
+        toast.done("Error adding product to wishlist.")
+      }
     }
   };
 
@@ -193,10 +236,10 @@ function Product(props) {
         </h3>
 
         <div className="product-action"
-          style = {{
-            display:'flex',
-            alignItems:'center',
-            justifyContent:'center'
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
           }}
         >
           {noAction === true ? (
@@ -205,7 +248,7 @@ function Product(props) {
             <AnchorIconButton
               href={`${process.env.PUBLIC_URL}/pages/wishlist`}
               className={`btn-icon-wish ${isInWishlist ? "checked" : ""}`}
-              onClick={onWishlistClick}
+              onClick={(e) => { handleAddToWishlist(e) }}
               hoverColor={adjustColorBrightness(
                 sellerConfigs.Theme.ColorPalette["Gray-30"],
                 -25
@@ -218,7 +261,7 @@ function Product(props) {
           )}
           <AddToCartButton
             className="btn-icon btn-add-cart"
-            onClick={() => addToCart(product, 1, cartWishListDispach)}
+            onClick={handleAddToCart}
             backgroundColor={sellerConfigs.Theme.ColorPalette["Secondary"]}
             textColor={sellerConfigs.Theme.ColorPalette["White"]}
             hoverTextColor={sellerConfigs.Theme.ColorPalette["White"]}

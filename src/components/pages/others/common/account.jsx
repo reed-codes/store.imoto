@@ -145,7 +145,6 @@ const Account = () => {
 
     // handleUpdateUser will update user data in DynamoDB via COMAPI
     const handleUpdateUserClicked = async () => {
-        console.log("USER LOYALTY PROGRAMS: ", userLoyaltyPrograms);
         try {
             setAlert({
                 openUpdate: true,

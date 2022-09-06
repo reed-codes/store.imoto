@@ -13,7 +13,11 @@ import { useSellerConfig } from "../../../store/sellerConfigContext";
 
 import styled from "styled-components";
 import "../global-css/styles.css";
+
+import { CartWishListContext } from "../../../store/CartWishlistContext";
+
 import Notifications from "./components/notifications";
+
 
 const AnchorButton = styled.a`
   cursor: pointer;
@@ -36,11 +40,16 @@ const AnchorIconButton = styled.a`
   }
 `;
 
-function ThemeOne() {
-  const phoneImage = "assets/images/demo/phone.png", badgePos = 2;
-  
+
+function ThemeOne(props) {
+  const phoneImage = "assets/images/demo/phone.png",
+    badgePos = 2;
+
   const { sellerConfigs, sellerConfigDispatch } = useSellerConfig();
   const [cognitoUserName, setCognitoUserName] = useState("");
+  const { cartWishList } = useContext(CartWishListContext);
+
+  const wishlistItems = cartWishList.wishlist ? cartWishList.wishlist : [];
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -75,7 +84,8 @@ function ThemeOne() {
    * authentication then the user will be redirected to the home page
    * else this action is catered for by cognito.
    */
-  const handleSignoutClicked = async () => {
+  const handleSignoutClicked = async (e) => {
+    e.preventDefault();
     sessionStorage.clear();
     localStorage.clear();
     try {
@@ -88,7 +98,8 @@ function ThemeOne() {
     }
   };
 
-  const handleSigninClicked = () => {
+  const handleSigninClicked = (e) => {
+    e.preventDefault();
     sellerConfigDispatch(setOpenAuthenticationModal(true));
   };
 
@@ -186,7 +197,6 @@ function ThemeOne() {
               >
                 Call us now
                 <span
-                  href="#"
                   className="font1"
                   style={{
                     color: sellerConfigs.Theme.ColorPalette["Quinary"],
@@ -198,24 +208,52 @@ function ThemeOne() {
               </h6>
             </div>
 
-            <Notifications/>
+            <Notifications />
             <AnchorIconButton
-              href={`${process.env.PUBLIC_URL}/pages/wishlist`}
+              onClick={() =>
+                props.history.push(`${process.env.PUBLIC_URL}/pages/wishlist`)
+              }
               className="header-icon"
               title="Wishlist"
               hoverColor={sellerConfigs.Theme.ColorPalette["Primary"]}
               color={sellerConfigs.Theme.ColorPalette["Gray-10"]}
+              style={{
+                position: 'relative',
+                marginRight: '1.5rem',
+
+              }}
             >
-              <i className="icon-wishlist-2"></i>
+              {
+                wishlistItems.length === 0 ? (
+                  <>
+                    <i className="icon-wishlist-2"></i>
+                  </>
+                ) : (
+                  <>
+                    <i className="icon-wishlist-2"></i>
+                    <span
+                      className="cart-count badge-circle"
+                      style={{
+                        background: sellerConfigs.Theme.ColorPalette["Quaternary"],
+                        color: sellerConfigs.Theme.ColorPalette["White"],
+                        right: '0px',
+                        left: '18px'
+                      }}
+                    >
+                      {wishlistItems.length}
+                    </span>
+                  </>
+                )
+              }
+
             </AnchorIconButton>
 
-            <CartMenu btnClass="btn-dark" />
+            <CartMenu btnClass="btn-dark" history={props.history} />
 
             {cognitoUserName ? (
               <ul className="menu">
                 <li>
                   <AnchorIconButton
-                    href={"#"}
                     style={{ marginLeft: 10 }}
                     className="dropdown-toggle dropdown-arrow "
                     hoverColor={sellerConfigs.Theme.ColorPalette["Primary"]}
@@ -239,7 +277,6 @@ function ThemeOne() {
                           sellerConfigs.Theme.ColorPalette["Gray-30"],
                           25
                         )}
-                        href="#"
                       >
                         {cognitoUserName}
                       </AnchorButton>
@@ -250,7 +287,11 @@ function ThemeOne() {
                           sellerConfigs.Theme.ColorPalette["Gray-30"],
                           25
                         )}
-                        href={`${process.env.PUBLIC_URL}/pages/dashboard/board`}
+                        onClick={() =>
+                          props.history.push(
+                            `${process.env.PUBLIC_URL}/pages/dashboard/board`
+                          )
+                        }
                       >
                         <i style={{ marginRight: 20 }} className="fa fa-user" />
                         My Account
@@ -262,7 +303,6 @@ function ThemeOne() {
                           sellerConfigs.Theme.ColorPalette["Gray-30"],
                           25
                         )}
-                        href={"#"}
                         onClick={handleSignoutClicked}
                       >
                         <i
@@ -280,7 +320,6 @@ function ThemeOne() {
                 title="Login"
                 style={{ marginLeft: 10 }}
                 className={"login-link header-icon"}
-                href="#"
                 onClick={handleSigninClicked}
                 hoverColor={sellerConfigs.Theme.ColorPalette["Primary"]}
                 color={sellerConfigs.Theme.ColorPalette["Gray-10"]}

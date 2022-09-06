@@ -4,7 +4,7 @@ import {
   SHOW_CART_MODAL,
   HIDE_CART_MODAL,
   CLEAR_CART,
-  DECREMENT_QTY,
+  INCREMENT_QTY,
   REFRESH_STORE,
   ADD_TO_WISHLIST,
   REMOVE_FROM_WISHLIST,
@@ -12,36 +12,39 @@ import {
   MOVE_ITEM_FROM_CART_TO_WISHLIST,
   MOVE_ITEM_FROM_WISHLIST_TO_CART,
   INIT_CART_WISHLIST,
+  DECREMENT_QTY,
   SET_ORDER,
   SET_ORDER_DETAILS,
   SET_DELIVERY_ADDRESS,
   SET_DELIVERY_METHOD,
+  SET_QTY,
+
 } from "../../constants/action-types";
 import { findCartIndex } from "../../utils/index";
 
 export let initialCartWishlistState = {
-  cart:[],
-  wishlist:[],
+  cart: [],
+  wishlist: [],
   order: {
     OrderID: "",
     SellerID: "",
     UserID: "",
     AccountID: "",
     CreateDate: "",
-    RequiredByDate: "", 
-    PaymentMethod: "PAYPAL", 
+    RequiredByDate: "",
+    PaymentMethod: "PAYPAL",
     PaymentTerms: "PayBefore",
     DeliveryMethod: "",
     PostedToERP: false,
     Type: "ORDER",
     Status: "Ordered",
-    Reference: "", 
-    Comments: "", 
+    Reference: "",
+    Comments: "",
     Total: 0.0,
     TotalExcl: 0.0,
-    TotalTax: 0.0 ,
+    TotalTax: 0.0,
     Address: {
-      Selected: 0, 
+      Selected: 0,
       Type: "",
       Address1: "",
       Address2: "",
@@ -57,17 +60,15 @@ export let initialCartWishlistState = {
 }
 
 
-export const cartWishlistReducer = ( state , action ) => {
+export const cartWishlistReducer = (state, action) => {
   switch (action.type) {
     case INIT_CART_WISHLIST:
-      const cartLists = action.lists.cart
-      const wishLists = action.lists.wishlist
       return {
-        ...state , 
-        cart:cartLists,
-        wishlist:wishLists,
+        ...state,
+        cart: action.lists.cart,
+        wishlist: action.lists.wishlist,
       };
-      
+
     case ADD_TO_WISHLIST:
       if (!findCartIndex(state.wishlist, action.product.ProductID)) {
         return {
@@ -76,8 +77,8 @@ export const cartWishlistReducer = ( state , action ) => {
             ...state.wishlist,
             {
               ProductID: action.product.ProductID,
-              qty: 1,
-              productInfo: action.product,
+              Quantity: 1,
+              ProductInfo: action.product,
             },
           ],
         };
@@ -101,12 +102,7 @@ export const cartWishlistReducer = ( state , action ) => {
           if (product.ProductID === action.product.ProductID) {
             acc.push({
               ...product,
-              qty: product.qty + action.qty,
-              sum:
-                (product.salePrice
-                  ? product.salePrice
-                  : product.productInfo.Price) *
-                (product.qty + product.qty),
+              Quantity: product.Quantity + action.qty,
             });
           } else {
             acc.push(product);
@@ -122,22 +118,18 @@ export const cartWishlistReducer = ( state , action ) => {
           ...state.cart,
           {
             ProductID: action.product.ProductID,
-            qty: action.qty,
-            productInfo: action.product,
-            sum:
-              (action.product.salePrice
-                ? action.product.salePrice
-                : action.product.Price) * action.qty,
+            Quantity: action.qty,
+            ProductInfo: action.product,
           },
         ],
       };
 
     case REMOVE_FROM_CART:
+      const temp = state.cart.filter((item) => item.ProductID !== action.product.ProductID)
+
       return {
         ...state,
-        cart: state.cart.filter(
-          (item) => item.ProductID !== action.product.ProductID
-        ),
+        cart: temp
       };
 
     case CLEAR_CART:
@@ -145,24 +137,34 @@ export const cartWishlistReducer = ( state , action ) => {
         ...state,
         cart: [],
       };
-    
+
     case CLEAR_WISHLIST:
       return {
         ...state,
         wishlist: [],
       };
 
+    case INCREMENT_QTY:
+      const cartQ = state.cart.reduce((acc, product) => {
+        if (product.ProductID === action.product.ProductID) {
+          acc.push({
+            ...product,
+            Quantity: product.Quantity + 1,
+          });
+        } else {
+          acc.push(product);
+        }
+        return acc;
+      }, []);
+
+      return { ...state, cart: cartQ };
+
     case DECREMENT_QTY:
       const cart = state.cart.reduce((acc, product) => {
         if (product.ProductID === action.product.ProductID) {
           acc.push({
             ...product,
-            qty: product.qty - 1,
-            sum:
-              (action.product.salePrice
-                ? action.product.productInfo.salePrice
-                : action.product.productInfo.Price) *
-              (product.qty - 1),
+            Quantity: product.Quantity - 1,
           });
         } else {
           acc.push(product);
@@ -172,8 +174,33 @@ export const cartWishlistReducer = ( state , action ) => {
 
       return { ...state, cart };
 
+    case SET_QTY:
+      const updatedCart = state.cart.reduce((acc, product) => {
+        if (product.ProductID === action.product.ProductID) {
+          acc.push({
+            ...product,
+            Quantity: action.qty,
+          });
+        } else {
+          acc.push(product);
+        }
+        return acc;
+      }, []);
+
+      return { ...state, cart: updatedCart };
+
     case MOVE_ITEM_FROM_CART_TO_WISHLIST:
-      console.log(action);
+      if (findCartIndex(state.wishlist, action.product.ProductID)) {
+        return {
+          ...state,
+          cart: state.cart.filter(
+            (item) => item.ProductID !== action.product.ProductID
+          ),
+          wishlist: [
+            ...state.wishlist,
+          ],
+        };
+      }
       return {
         ...state,
         cart: state.cart.filter(
@@ -183,27 +210,19 @@ export const cartWishlistReducer = ( state , action ) => {
           ...state.wishlist,
           {
             ProductID: action.product.ProductID,
-            qty: 1,
-            productInfo: action.product.productInfo,
+            Quantity: 1,
+            ProductInfo: action.product,
           },
         ],
       };
 
     case MOVE_ITEM_FROM_WISHLIST_TO_CART:
-
       if (findCartIndex(state.cart, action.product.ProductID)) {
         const cart = state.cart.reduce((acc, product) => {
           if (product.ProductID === action.product.ProductID) {
-            console.log("about to push here" , product)
-            console.log("about to push here" , action.product)
             acc.push({
               ...product,
-              qty: product.qty + action.product.qty,
-              sum:
-                (product.salePrice
-                  ? product.salePrice
-                  : product.productInfo.Price) *
-                (product.qty + product.qty),
+              Quantity: product.Quantity + action.product.Quantity,
             });
           } else {
             acc.push(product);
@@ -228,13 +247,8 @@ export const cartWishlistReducer = ( state , action ) => {
           ...state.cart,
           {
             ProductID: action.product.ProductID,
-            qty: 1,
-            productInfo: action.product.productInfo,
-            sum:
-              (action.product.salePrice
-                ? action.product.productInfo.salePrice
-                : action.product.productInfo.Price) *
-              (action.product.qty + action.product.qty),
+            Quantity: 1,
+            ProductInfo: action.product.ProductInfo,
           },
         ],
       };
@@ -244,9 +258,9 @@ export const cartWishlistReducer = ( state , action ) => {
         ...state,
         showModal: true,
         modalProduct:
-          action.product.productInfo === undefined
+          action.product.ProductInfo === undefined
             ? action.product
-            : action.product.productInfo,
+            : action.product.ProductInfo,
       };
 
     case HIDE_CART_MODAL:
@@ -258,7 +272,7 @@ export const cartWishlistReducer = ( state , action ) => {
     case SET_DELIVERY_METHOD:
       return {
         ...state,
-        order : {
+        order: {
           ...state.order,
           DeliveryMethod: action.payload
         }
@@ -266,9 +280,9 @@ export const cartWishlistReducer = ( state , action ) => {
     case SET_DELIVERY_ADDRESS:
       return {
         ...state,
-        order : {
+        order: {
           ...state.order,
-          Address: { ...action.payload}
+          Address: { ...action.payload }
         }
       }
 
@@ -277,11 +291,11 @@ export const cartWishlistReducer = ( state , action ) => {
         ...state,
         order: { ...action.payload }
       }
-  
+
     case SET_ORDER_DETAILS:
       return {
         ...state,
-        order : {
+        order: {
           ...state.order,
           RequiredByDate: action.payload.RequiredByDate,
           Comments: action.payload.Comments,

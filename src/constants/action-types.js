@@ -27,6 +27,7 @@ export const ADD_TO_CART = 'ADD_TO_CART';
 export const INIT_CART = 'INIT_CART';
 export const REMOVE_FROM_CART = 'REMOVE_FROM_CART';
 export const INCREMENT_QTY = 'INCREMENT_QTY';
+export const SET_QTY = 'SET_QTY';
 export const DECREMENT_QTY = 'DECREMENT_QTY';
 export const CLEAR_CART = 'CLEAR_CART';
 export const MOVE_ITEM_FROM_CART_TO_WISHLIST = 'MOVE_ITEM_FROM_CART_TO_WISHLIST';

@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 
 import { addToCart, addToWishList, showQuickView } from "../../../action";
-import { findIndex } from "../../../utils";
+import { findCartIndex } from "../../../utils";
 
 import { WishlistContext } from "../../../store/WishlistContext";
 import { PricelistContext } from "../../../store/PricelistContext";
@@ -13,11 +13,16 @@ function ProductTypeOne(props) {
   const { pricelistDispach } = useContext(PricelistContext);
   const { cartDispach } = useContext(CartListContext);
   const { addClass, product } = props;
-  let isInWishlist = props.product
-    ? findIndex(wishlist.list, props.product.ProductID)
-      ? true
-      : false
-    : false;
+  let isInWishlist = false;
+  if(props.product){
+    if(findCartIndex(cartWishList.wishlist, props.product.ProductID)){
+      isInWishlist = true
+    }else{
+      isInWishlist = false
+    }
+  }else{
+    isInWishlist = false
+  }
   if (!product) return <div></div>;
 
   const onWishlistClick = (e) => {

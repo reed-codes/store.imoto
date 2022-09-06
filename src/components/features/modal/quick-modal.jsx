@@ -7,13 +7,14 @@ import imagesLoaded from "imagesloaded";
 import Qty from "../qty";
 import Carousel from "../../features/carousel";
 
-import { findIndex } from "../../../utils";
+import { findCartIndex } from "../../../utils";
 import { quickAddToCart, addToWishList, hideQuickView } from "../../../action";
 
-import { WishlistContext } from "../../../store/WishlistContext";
 import { PricelistContext } from "../../../store/PricelistContext";
-import { CartListContext } from "../../../store/CartListContext";
 import { CartWishListContext } from "../../../store/CartWishlistContext";
+import { useSellerConfig } from "../../../store/sellerConfigContext";
+import { addListItemToList } from "../../../api";
+import { toast } from "react-toastify";
 
 const customStyles = {
   content: {
@@ -28,22 +29,26 @@ const customStyles = {
   },
 };
 
-function QuickModal() {
-  // const { wishlist, wishlistDispach } = useContext(WishlistContext);
+const QuickModal = () => {
   const { cartWishList,
     cartWishListDispach } = useContext(CartWishListContext);
   const { pricelistState, pricelistDispach } = useContext(PricelistContext);
-
+  const { sellerConfigs } = useSellerConfig()
   const modalShow = pricelistState.quickShow;
   const product = pricelistState.single;
 
-  let isInWishlist = product
-    ? findIndex(cartWishList, product.ProductID)
-      ? true
-      : false
-    : false;
+  let isInWishlist = false;
+  if (product) {
+    if (findCartIndex(cartWishList.wishlist, product.ProductID)) {
+      isInWishlist = true
+    } else {
+      isInWishlist = false
+    }
+  } else {
+    isInWishlist = false
+  }
 
-  function closeModal() {
+  const closeModal = () => {
     document.querySelector(".product-quick-view") &&
       (document.querySelector(".product-quick-view").style.opacity = 0);
     setTimeout(() => {
@@ -51,17 +56,34 @@ function QuickModal() {
     }, 40);
   }
 
-  function addToCart(e) {
+  const handleAddToCart = async (e) => {
     e.preventDefault();
     let val = parseInt(
       e.currentTarget.parentElement
         .querySelector(".horizontal-quantity")
         .getAttribute("value")
     );
-    quickAddToCart(product, val, cartWishListDispach);
+    let listItem = {
+      ProductID: product.ProductID,
+      Quantity: val,
+      ProductInfo: product.ProductInfo,
+    };
+
+    // reducer
+    cartWishListDispach(quickAddToCart(product, val));
+
+    // api call
+    const [, addToCartError] = await addListItemToList(sellerConfigs.SellerID, "cart", listItem);
+    if (addToCartError === null) {
+      toast.success("Item successfully added to cart.")
+      return
+    }
+    toast.error("Item not successfully added to cart.")
+    closeModal()
+
   }
 
-  function onWithWishClick(e) {
+  const onWithWishClick = (e) => {
     if (!isInWishlist) {
       e.preventDefault();
       cartWishListDispach(addToWishList(product));
@@ -85,7 +107,7 @@ function QuickModal() {
     }
   };
 
-  function afterOpenModal() {
+  const afterOpenModal = () => {
     let imgLoad = imagesLoaded(".product-single-gallery");
 
     if (document.querySelector(".quickview-modal-overlay .skeleton-body")) {
@@ -94,7 +116,7 @@ function QuickModal() {
         .classList.remove("loaded");
     }
 
-    imgLoad.on("done", function() {
+    imgLoad.on("done", () => {
       if (document.querySelector(".quickview-modal-overlay .skeleton-body")) {
         document
           .querySelector(".quickview-modal-overlay .skeleton-body")
@@ -109,7 +131,7 @@ function QuickModal() {
     document.querySelector(".product-quick-view").style.opacity = 1;
   }
 
-  function thumbActiveHandler(e) {
+  const thumbActiveHandler = (e) => {
     e.currentTarget.parentNode.parentNode.querySelector(".active") &&
       e.currentTarget.parentNode.parentNode
         .querySelector(".active")
@@ -143,38 +165,38 @@ function QuickModal() {
                 <Carousel addClass="product-single-carousel">
                   {product.ImageURL
                     ? product.ImageURL.map((gallery, index) => (
-                        <div
-                          className="product-item"
-                          key={"product-item" + index}
-                        >
-                          <Magnifier
-                            imageSrc={
-                              "https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/new-tech-gadgets-7-2-stand-hub-for-mac-mini-1625159248.jpg?resize=480:*"
-                            }
-                            imageAlt="product"
-                            mouseActivation="hover"
-                            cursorStyleActive="crosshair"
-                            dragToMove={false}
-                            className="product-single-image"
-                          />
-                        </div>
-                      ))
+                      <div
+                        className="product-item"
+                        key={"product-item" + index}
+                      >
+                        <Magnifier
+                          imageSrc={
+                            "https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/new-tech-gadgets-7-2-stand-hub-for-mac-mini-1625159248.jpg?resize=480:*"
+                          }
+                          imageAlt="product"
+                          mouseActivation="hover"
+                          cursorStyleActive="crosshair"
+                          dragToMove={false}
+                          className="product-single-image"
+                        />
+                      </div>
+                    ))
                     : ""}
                 </Carousel>
               </div>
               <div className="prod-thumbnail owl-dots">
                 {product.ImageURL
                   ? product.ImageURL.map((gallery, index) => (
-                      <div className="col-3 owl-dot" key={"prod-nav" + index}>
-                        <img
-                          src={
-                            "https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/new-tech-gadgets-7-2-stand-hub-for-mac-mini-1625159248.jpg?resize=480:*"
-                          }
-                          alt="product"
-                          onClick={thumbActiveHandler}
-                        />
-                      </div>
-                    ))
+                    <div className="col-3 owl-dot" key={"prod-nav" + index}>
+                      <img
+                        src={
+                          "https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/new-tech-gadgets-7-2-stand-hub-for-mac-mini-1625159248.jpg?resize=480:*"
+                        }
+                        alt="product"
+                        onClick={thumbActiveHandler}
+                      />
+                    </div>
+                  ))
                   : ""}
               </div>
             </div>
@@ -217,7 +239,7 @@ function QuickModal() {
                     to="#"
                     className="btn btn-dark add-cart"
                     title="Add to Cart"
-                    onClick={addToCart}
+                    onClick={handleAddToCart}
                   >
                     <span>Add to Cart</span>
                   </Link>
@@ -232,9 +254,8 @@ function QuickModal() {
 
                   <Link
                     to={`${process.env.PUBLIC_URL}/pages/wishlist`}
-                    className={`paction add-wishlist ${
-                      isInWishlist === true ? "checked" : ""
-                    }`}
+                    className={`paction add-wishlist ${isInWishlist === true ? "checked" : ""
+                      }`}
                     title={isInWishlist ? "Go To Wishlist" : "Add To Wishlist"}
                     onClick={onWithWishClick}
                   >

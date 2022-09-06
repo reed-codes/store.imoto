@@ -27,7 +27,7 @@ const ProductsDetails = () => {
                                     <Link to={`${process.env.PUBLIC_URL}/products/default/${item.ProductID}`}>
                                         <img
                                         style={{ marginLeft: 0, objectFit: "cover" }}
-                                        src={item.productInfo.ImageURL[0]}
+                                        src={item.ProductInfo.ImageURL[0]}
                                         alt="product"
                                         />
                                     </Link>
@@ -35,17 +35,17 @@ const ProductsDetails = () => {
                                 </td>
                                 <td className="product-title">
                                     <Link to={`${process.env.PUBLIC_URL}/products/default/${item.ProductID}`}>
-                                        {item.productInfo.Description}
+                                        {item.ProductInfo.Description}
                                     </Link>
                                 </td>
                                 <td className="product-stock-status">
                                     <span className="stock-status">
-                                    {item.qty}
+                                    {item.Quantity}
                                     </span>
                                 </td>
                                 <td className="price-box" style={{textAlign:"right", paddingRight: 0}}>
                                     <span >
-                                        ${item.productInfo.Price.toFixed(2)}
+                                        ${item.ProductInfo.Price.toFixed(2)}
                                     </span>
                                 </td>
                             </tr>

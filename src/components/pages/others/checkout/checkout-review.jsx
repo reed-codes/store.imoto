@@ -15,12 +15,15 @@ import { CartWishListContext } from "../../../../store/CartWishlistContext";
 import OrderPlacedNotice from '../common/order-placed-notice';
 import ProductsDetails from '../common/product-details';
 
+
 import { getISODateFormat } from '../../../../utils/helpers';
 import UserSellerContext from '../../../../store/UserSellerContext';
 import { getCartTotal } from '../../../../utils';
+import { clearCart } from '../../../../action';
+import { createOrUpdateList } from '../../../../api';
 
 const CheckoutReview = (props) => {
-    const { cartWishList } = useContext(CartWishListContext);
+    const { cartWishList, cartWishListDispach } = useContext(CartWishListContext);
     const { userSeller } = useContext(UserSellerContext);
 
     const [orderPlaced, setOrderplaced] = useState(false); 
@@ -51,12 +54,20 @@ const CheckoutReview = (props) => {
 
     const handlePlaceOrder = async () => {
         const order = getOrderDetails();
-        
+
         const ax = await instanceCOMAPI();
         try {
             await ax.post("order", order);
             setOrderplaced(true);
-            toast.success("Order successfully created")
+
+            // clear the order and dispatch.
+            cartWishListDispach(clearCart());
+            await createOrUpdateList({
+                List: "cart",
+                SellerID: userSeller.Seller.SellerID,
+                ListItems: []
+            });
+            toast.success("Order successfully created");
         } catch (error) {
             toast.error("Error creating order")
         }
@@ -85,9 +96,9 @@ const CheckoutReview = (props) => {
             return {
                 ItemID: index,
                 ProductID: cartItem.ProductID,
-                Description: cartItem.productInfo.Description,
-                OrderQty: cartItem.qty,
-                OrderPrice: cartItem.productInfo.Price * cartItem.qty,
+                Description: cartItem.ProductInfo.Description,
+                OrderQty: cartItem.Quantity,
+                OrderPrice: cartItem.ProductInfo.Price * cartItem.Quantity,
                 ConfirmedQty: 0,
                 ConfirmedPrice: 0,
             };

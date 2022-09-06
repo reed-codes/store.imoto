@@ -44,7 +44,6 @@ const NewProductAdder = (props) => {
         const cachedRequestData = JSON.parse(cachedRequestDataJSON);
 
         if (cachedRequestData.searchString === searchString) {
-          console.log("using cache...");
           setProductResults({
             searched: true,
             list: cachedRequestData.response,

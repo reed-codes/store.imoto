@@ -57,12 +57,12 @@ const OrderSummary = () => {
                     <td className="product-col">
                       <figure className="product-image-container">
                         <Link
-                          to={ `${ process.env.PUBLIC_URL }/products/default/${ item.productInfo.ProductID }` }
+                          to={ `${ process.env.PUBLIC_URL }/products/default/${ item.ProductInfo.ProductID }` }
                           className="product-image"
                         >
                           <img
                             style={{ objectFit: "cover", height: "100%" }}
-                            src={ item.productInfo.ImageURL[ 0 ] }
+                            src={ item.ProductInfo.ImageURL[ 0 ] }
                             alt="product"
                           />
                         </Link>
@@ -70,15 +70,15 @@ const OrderSummary = () => {
                       <div>
                         <h2 className="product-title">
                           <Link
-                            to={ `${ process.env.PUBLIC_URL }/products/default/${ item.productInfo.ProductID }` }
+                            to={ `${ process.env.PUBLIC_URL }/products/default/${ item.ProductInfo.ProductID }` }
                           >
-                            { item.productInfo.Description }
+                            { item.ProductInfo.Description }
                           </Link>
                         </h2>
-                        <span className="product-qty">Qty:  {item.qty}</span>
+                        <span className="product-qty">Qty:  {item.Quantity}</span>
                       </div>
                     </td>
-                    <td className="price-col">${ item.sum.toFixed( 2 ) }</td>
+                    <td className="price-col">${ (item.ProductInfo.Price * item.Quantity).toFixed( 2 ) }</td>
                   </tr>
                 ))}
               </tbody>

@@ -4,35 +4,88 @@ import { Helmet } from "react-helmet";
 
 import Breadcrumb from "../../../common/breadcrumb";
 import withAuthCheck from "../../../hoc/withAuthCheck";
-
+import { addListItemToList, createOrUpdateList, deleteListItemByListName } from "../../../../api";
 import {
   removeFromWishlist,
   showQuickView,
-  moveFromWishlistToCart,
   clearWishlist,
+  addToCart,
+  addToWishList,
+  removeFromCart,
 } from "../../../../action";
 
-import { WishlistContext } from "../../../../store/WishlistContext";
 import { PricelistContext } from "../../../../store/PricelistContext";
 import { CartWishListContext } from "../../../../store/CartWishlistContext";
+import { useSellerConfig } from "../../../../store/sellerConfigContext";
+import { toast } from "react-toastify";
 
-function Wishlist(props) {
-  // const { wishlist, wishlistDispach } = useContext(WishlistContext);
+function Wishlist() {
   const { cartWishList, cartWishListDispach } = useContext(CartWishListContext);
   const { pricelistDispach } = useContext(PricelistContext);
+  const { sellerConfigs } = useSellerConfig();
 
-  function moveToCart(e, item) {
+  const handleRemoveFromWishlist = async (e, item) => {
     e.preventDefault();
-    moveFromWishlistToCart(item, cartWishListDispach);
-  }
+    const listItem = {
+      ProductID: item.ProductID,
+      Quantity: item.Quantity,
+    };
+    const [, error] = await deleteListItemByListName(sellerConfigs.SellerID, "wishlist", listItem.ProductID, listItem)
+    if (error) {
+      toast.error("Error occured while deliting list item");
+      return;
+    }
+    toast.success("List Item Deleted");
+    cartWishListDispach(removeFromWishlist(item));
+  };
 
-  function removeWishlist(e, item) {
+  const handleClearWishlist = async (e) => {
     e.preventDefault();
-    removeFromWishlist(item, cartWishListDispach);
-  }
-  const handleClearWishlist = (e) => {
+    const emptyList = {
+      List: "wishlist",
+      SellerID: sellerConfigs.SellerID,
+      ListItems: []
+    }
+
+    if (cartWishList.wishlist.length > 0) {
+      cartWishListDispach(clearWishlist());
+      const [, error] = await createOrUpdateList(emptyList);
+      if (error) {
+        toast.error("Error clearing wishlist");
+        return
+      }
+      toast.success("Cleared wishlist")
+    }
+  };
+
+  const handleMoveItemFromWishListToCart = async (e, item) => {
+    cartWishListDispach(addToCart(item.ProductInfo));
+    cartWishListDispach(removeFromWishlist(item));
     e.preventDefault();
-    clearWishlist(cartWishListDispach);
+
+    let listItem = {
+      ProductID: item.ProductID,
+      Quantity: 1,
+      ProductInfo: item.ProductInfo,
+    };
+
+    cartWishList.cart.map((product) => {
+      if (product.ProductID === item.ProductID) {
+        listItem.Quantity = product.Quantity + 1
+        return
+      }
+    });
+
+    const [, addToCartError] = await addListItemToList(sellerConfigs.SellerID, "cart", listItem);
+    const [, removeFromWishlistError] = await deleteListItemByListName(sellerConfigs.SellerID, "wishlist", listItem.ProductID, listItem);
+
+    if (addToCartError === null && removeFromWishlistError === null) {
+      toast.success("Added item to cart");
+    } else {
+      cartWishListDispach(addToWishList(item.ProductInfo));
+      cartWishListDispach(removeFromCart(item));
+      toast.error("Error adding item to cart");
+    }
   };
 
   return (
@@ -40,19 +93,15 @@ function Wishlist(props) {
       <Helmet>
         <title>Porto React Ecommerce - Wishlist Page </title>
       </Helmet>
-
       <h1 className="d-none">Porto React Ecommerce - Wishlist Page</h1>
-
       <div className="main">
         <Breadcrumb current="Wishlist" parent="pages" />
-
         <div className="container">
           {cartWishList.wishlist.length === 0 ? (
             <div className="align-left mt-3">
               <div className="wishlist-title ">
                 <h2>My wishlist on Porto Store</h2>
               </div>
-
               <div className="box-content">
                 <table
                   className="table-wishlist"
@@ -65,25 +114,20 @@ function Wishlist(props) {
                   <thead className="d-none">
                     <tr>
                       <th className="product-thumbnail"></th>
-
                       <th className="product-name">
                         <span className="nobr">Product</span>
                       </th>
-
                       <th className="product-price">
                         <span className="nobr">price</span>
                       </th>
-
                       <th className="product-stock-status">
                         <span className="nobr">Stock status</span>
                       </th>
-
                       <th className="product-add-to-cart">
                         <span className="nobr">Actions</span>
                       </th>
                     </tr>
                   </thead>
-
                   <tbody className="wishlist-items-wrapper">
                     <tr className="border-0 py-0">
                       <td colSpan="6" className="px-3 py-2 text-center">
@@ -133,14 +177,15 @@ function Wishlist(props) {
                               >
                                 <img
                                   style={{ objectFit: "cover" }}
-                                  src={item.productInfo.ImageURL[0]}
+                                  src={item.ProductInfo.ImageURL[0]}
                                   alt="product"
                                 />
                               </Link>
-
                               <Link
                                 to="#"
-                                onClick={(e) => removeWishlist(e, item)}
+                                onClick={(event) =>
+                                  handleRemoveFromWishlist(event, item)
+                                }
                                 className="remove remove-from-wishlist"
                               >
                                 <i className="icon-cancel"></i>
@@ -151,27 +196,25 @@ function Wishlist(props) {
                             <Link
                               to={`${process.env.PUBLIC_URL}/products/default/${item.ProductID}`}
                             >
-                              {item.productInfo.Description}
+                              {item.ProductInfo.Description}
                             </Link>
                           </td>
-
                           <td className="price-box">
                             <span className="product-price">
-                              ${item.productInfo.Price.toFixed(2)}
+                              ${item.ProductInfo.Price.toFixed(2)}
                             </span>
                           </td>
-
                           <td className="product-stock-status">
                             <span className="stock-status">
-                              {item.productInfo.Stock > 10
+                              {item.ProductInfo.Stock > 10
                                 ? "In Stock"
                                 : "Out of Stock"}
                             </span>
                           </td>
                           <td className="product-action">
-                            <button
-                              className="btn btn-add-cart"
-                              onClick={(e) => moveToCart(e, item)}
+                            <button 
+                              className={"btn btn-add-cart"}
+                              onClick={(e) => handleMoveItemFromWishListToCart(e, item)}
                             >
                               <span>Add to Cart</span>
                             </button>
@@ -182,7 +225,7 @@ function Wishlist(props) {
                               onClick={(e) => {
                                 e.preventDefault();
                                 pricelistDispach(
-                                  showQuickView(item.productInfo)
+                                  showQuickView(item.ProductInfo)
                                 );
                               }}
                             >
@@ -193,31 +236,35 @@ function Wishlist(props) {
                         </tr>
                       </React.Fragment>
                     ))}
+                    <React.Fragment>
+                      <tr>
+                        <td className="product-thumbnail"/>
+                        <td className="product-title"/>
+                        <td className="price-box">
+                          <span className="product-price"/>
+                        </td>
+                        <td className="product-stock-status">
+                          <span className="stock-status"/>
+                        </td>
+                        <td className="product-action">
+                          <div className={"float-right"}>
+                            <Link
+                              to="#"
+                              className="btn btn-outline-secondary btn-clear-cart"
+                              onClick={handleClearWishlist}
+                            >
+                              Clear Wishlist
+                            </Link>
+                          </div>
+                        </td>
+                      </tr>
+                    </React.Fragment>
                   </tbody>
                 </table>
-
-                <div
-                  className="float-right"
-                  style={{
-                    marginTop: "24px",
-                  }}
-                >
-                  <Link
-                    to="#"
-                    className="btn btn-outline-secondary btn-clear-cart"
-                    onClick={handleClearWishlist}
-                  >
-                    Clear Wishlist
-                  </Link>
-                </div>
               </div>
             </>
           )}
-
-          <div className="mb-2"></div>
         </div>
-
-        <div className="mb-6"></div>
       </div>
     </>
   );

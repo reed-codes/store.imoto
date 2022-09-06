@@ -98,9 +98,7 @@ export const getProduct = (productId) => ({
  * Show QuickView Modal
  * @param { Object } product
  */
-// export const showQuickView = ( product ) => dispatch => {
-//     dispatch({ type: types.SHOW_QUICKVIEW, product });
-// }
+
 export const showQuickView = (product) => ({
   type: types.SHOW_QUICKVIEW,
   product,
@@ -118,10 +116,16 @@ export const hideQuickView = () => ({ type: types.HIDE_QUICKVIEW });
  * @param { Object } product
  * @param { Number } qty
  */
-export const addToCart = (product, qty = 1, dispatch) => {
-  dispatch({ type: types.SHOW_CART_MODAL, product });
-  dispatch({ type: types.ADD_TO_CART, product, qty });
-};
+export const addToCart = (product, qty = 1) => ({
+  type: types.ADD_TO_CART,
+  product,
+  qty
+})
+
+export const showCartModal = (product) => ({
+  type: types.SHOW_CART_MODAL,
+  product
+})
 
 
 /**
@@ -129,35 +133,32 @@ export const addToCart = (product, qty = 1, dispatch) => {
  * @param { Object } product
  * @param { Number } qty
  */
-export const quickAddToCart = (product, qty = 1, dispatch) => {
-  dispatch({ type: types.ADD_TO_CART, product, qty });
-};
+export const quickAddToCart = (product, qty = 1) => ({
+  type: types.ADD_TO_CART,
+  product,
+  qty
+});
 /**
  * Add item in Wishlist to Cart
  * @param { Object } product
  * @param { Number } qty
  */
-// export const addToCartAndRemoveWishlist = ( product, qty, dispatch)=>{
-//     toast.success( "Item Added to Cart" );
-//     dispatch( { type: types.ADD_TO_CART, product, qty } );
-//     dispatch( { type: types.REMOVE_FROM_WISHLIST, product } );
-// }
 
 /**
  * Remove item from Cart
  * @param { Object } product
  */
-export const removeFromCart = (product, dispatch) => {
-  dispatch({ type: types.REMOVE_FROM_CART, product });
-};
+export const removeFromCart = (product) => ({
+   type: types.REMOVE_FROM_CART, product 
+});
 
 /**
  * Clear Cart
  * @param { Object } product
  */
-export const clearCart = (dispatch, product) => {
-  dispatch({ type: types.CLEAR_CART, product });
-};
+export const clearCart = ( product) => ({
+  type: types.CLEAR_CART, product
+});
 
 /**
  * Increment quantity of item
@@ -165,9 +166,9 @@ export const clearCart = (dispatch, product) => {
  * @param { Number } qty
  */
 export const incrementQty = (product) => ({
-  type: types.ADD_TO_CART,
+  type: types.INCREMENT_QTY,
   product,
-  qty: 1,
+  // qty: 1,
 });
 
 /**
@@ -179,25 +180,30 @@ export const decrementQty = (product) => ({
   product,
 });
 
+/**
+ * Decrement quantity of item
+ * @param { String } product
+ */
+ export const setQty = (product , qty) => ({
+  type: types.SET_QTY,
+  product,
+  qty
+});
+
 /********************* Wishlist Action *********************/
 
 /**
  * Add item to Wishlist
  * @param { Object } product
  */
-//  export const initWishList = (product) => {
-//   toast.success("Wishlist succesully initiated.");
-//   return { type: types.INIT_WISHLIST, product };
-// };
-
 
 /**
  * Add item to Wishlist
  * @param { Object } product
  */
- export const initCartWishList = (lists , dispatch) => {
-  dispatch({ type: types.INIT_CART_WISHLIST, lists });
-};
+export const initCartWishList = (lists) => ({
+   type: types.INIT_CART_WISHLIST, lists
+});
 
 
 
@@ -205,46 +211,42 @@ export const decrementQty = (product) => ({
  * Add item to Wishlist
  * @param { Object } product
  */
-export const addToWishList = (product) => {
-  return { type: types.ADD_TO_WISHLIST, product };
-};
+export const addToWishList = (product) => ({
+  type: types.ADD_TO_WISHLIST, product
+});
 
 /**
  * Remove item from Wishlist
  * @param { String } productId
  */
-export const removeFromWishlist = (product, dispatch) => {
-  dispatch({ type: types.REMOVE_FROM_WISHLIST, product });
-};
+export const removeFromWishlist = (product) => ({
+  type: types.REMOVE_FROM_WISHLIST, product
+});
 
 /**
  * Remove item from Cart and Add to Whishlist
  * @param { String } product
  */
-export const moveFromCartToWishlist = (product, dispatch) => {
-  // dispatch({ type: types.REMOVE_FROM_CART, product });
-  // dispatch({ type: types.ADD_TO_WISHLIST, product });
-  dispatch({ type:types.MOVE_ITEM_FROM_CART_TO_WISHLIST , product })
-};
+export const moveFromCartToWishlist = (product) => ({
+  type: types.MOVE_ITEM_FROM_CART_TO_WISHLIST, product 
+});
 
 /**
  * Remove item from Wishlist and Add to Cart
  * @param { String } product
  */
-export const moveFromWishlistToCart = (product, dispatch) => {
-  toast.success("Item Moved to Cart");
-  dispatch({ type:types.MOVE_ITEM_FROM_WISHLIST_TO_CART , product })
-};
+export const moveFromWishlistToCart = (product) => ({
+ type: types.MOVE_ITEM_FROM_WISHLIST_TO_CART, product 
+});
 
 /**
  * Remove item from Wishlist and Add to Cart
  * @param { String } product
  */
 
-export const clearWishlist = (dispatch, product) => {
-  toast.error("Cart Cleared");
-  dispatch({ type: types.CLEAR_WISHLIST, product });
-};
+export const clearWishlist = ( product) => ({
+ type: types.CLEAR_WISHLIST, product 
+});
 
 
 /********************* Compare Action *********************/

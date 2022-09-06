@@ -1,41 +1,45 @@
 import React, { useContext, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
-import { SlideToggle } from "react-slide-toggle";
+import { toast } from "react-toastify";
 
 import Breadcrumb from "../../../common/breadcrumb";
-import QtyVertical from "../common/qty-vertical";
-
-import {
-  removeFromCart,
-  clearCart,
-  moveFromCartToWishlist,
-} from "../../../../action";
-
+import { clearCart } from "../../../../action";
 import { HIDE_CART_MODAL } from '../../../../constants/action-types';
-
 import withAuthCheck from '../../../hoc/withAuthCheck';
-
 import { CartWishListContext } from "../../../../store/CartWishlistContext";
+import { useSellerConfig } from "../../../../store/sellerConfigContext";
+import { createOrUpdateList } from "../../../../api";
+import { getCartTotal } from "../../../../utils";
+import ProductItem from "../common/product-item";
 
 function ShoppingCart() {
   const { cartWishList, cartWishListDispach } = useContext(CartWishListContext);
-
+  const { sellerConfigs } = useSellerConfig();
   const cartItems = cartWishList.cart ? cartWishList.cart : [];
 
   useEffect(() => {
-    cartWishListDispach( { type: HIDE_CART_MODAL } );
+    cartWishListDispach({ type: HIDE_CART_MODAL });
   }, []);
 
-  const handleClearCart = (e) => {
+  const handleClearCart = async (e) => {
     e.preventDefault();
+    const emptyCart = {
+      List: "cart",
+      SellerID: sellerConfigs.SellerID,
+      ListItems: []
+    }
 
-    if (cartItems.length > 0) clearCart(cartWishListDispach) ;
-  };
+    if (cartWishList.cart.length > 0) {
+      cartWishListDispach(clearCart());
+    }
 
-  const moveToWishlist = (e, item) => {
-    e.preventDefault();
-     moveFromCartToWishlist(item,cartWishListDispach);
+    const [, error] = await createOrUpdateList(emptyCart);
+    if (error === null) {
+      toast.success("Successfully cleared cart")
+      return
+    }
+    toast.error("Error");
   };
 
   return (
@@ -43,12 +47,9 @@ function ShoppingCart() {
       <Helmet>
         <title>Porto React Ecommerce - Cart Page </title>
       </Helmet>
-
       <h1 className="d-none">Porto React Ecommerce - Cart Page</h1>
-
       <div className="main">
         <Breadcrumb current="Shopping Cart" />
-
         <div className="container">
           {cartItems.length === 0 ? (
             <div className="align-left mt-3">
@@ -86,7 +87,6 @@ function ShoppingCart() {
                       </th>
                     </tr>
                   </thead>
-
                   <tbody className="wishlist-items-wrapper">
                     <tr className="border-0 py-0">
                       <td colSpan="6" className="px-3 py-2 text-center">
@@ -129,73 +129,14 @@ function ShoppingCart() {
                       </tr>
                     </thead>
                     <tbody>
-     
-                      {cartItems.map((item, index) => (
-                          <React.Fragment key={"CartItem" + index}>
-                          <tr className="product-row">
-                            <td className="product-col">
-                              <figure className="product-image-container">
-                                <Link
-                                  to={`${process.env.PUBLIC_URL}/product/default/${item.ProductID}`}
-                                  className="product-image"
-                                >
-                                  <img
-                                    // src={`${process.env.PUBLIC_URL}/${item.productInfo.ImageURL[0]}`}
-                                    src={`${item.productInfo.ImageURL[0]}`}
-                                    style={{ objectFit:'cover' , height:'100%'}}
-                                    alt="product"
-                                  />
-                                </Link>
-
-                                <Link
-                                  to="#"
-                                  className="btn-remove icon-cancel"
-                                  title="Remove Product"
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    removeFromCart(item, cartWishListDispach);
-                                  }}
-                                ></Link>
-                              </figure>
-                              <h2 className="product-title">
-                                <Link
-                                  to={`${process.env.PUBLIC_URL}/product/default/${item.productInfo.ProductID}`}
-                                >
-                                  {item.productInfo.Description}
-                                </Link>
-                              </h2>
-                            </td>
-                            <td>
-                              $
-                              {item.productInfo.salePrice
-                                ? item.productInfo.salePrice.toFixed(2)
-                                : item.productInfo.Price.toFixed(2)}
-                            </td>
-                            <td>
-                              <QtyVertical
-                                product={item}
-                                id={`qty-vertical-${index}`}
-                              />
-                            </td>
-                            <td>${item.sum.toFixed(2)}</td>
-                          </tr>
-                          <tr className="product-action-row">
-                            <td colSpan="4" className="clearfix">
-                              <div className="float-left">
-                                <Link
-                                  to="#"
-                                  className="btn-move"
-                                  onClick={(e) => moveToWishlist(e, item)}
-                                >
-                                  Move to Wishlist
-                                </Link>
-                              </div>
-                            </td>
-                          </tr>
-                        </React.Fragment>
-                      ))}
+                      {cartItems.map((item, index) =>
+                        <ProductItem
+                          key={"CartItem" + index}
+                          product={item}
+                          index={index}
+                        />
+                      )}
                     </tbody>
-
                     <tfoot>
                       <tr>
                         <td colSpan="4" className="clearfix">
@@ -221,106 +162,11 @@ function ShoppingCart() {
                       </tr>
                     </tfoot>
                   </table>
-                </div>  
+                </div>
               </div>
-
               <div className="col-lg-4">
                 <div className="cart-summary">
-
-                  
                   <h3>Summary</h3>
-
-                  <SlideToggle collapsed={true}>
-                    {({ onToggle, setCollapsibleElement, toggleState }) => (
-                      <div>
-                        <h4>
-                          <Link
-                            to="#"
-                            role="button"
-                            data-toggle="collapse"
-                            onClick={onToggle}
-                            className={toggleState.toLowerCase()}
-                          >
-                            Estimate Shipping and Tax
-                          </Link>
-                        </h4>
-
-                        <div
-                          className="collapse show"
-                          ref={setCollapsibleElement}
-                          style={{ overflow: "hidden" }}
-                          id="total-estimate-section"
-                        >
-                          <form action="#">
-                            <div className="form-group form-group-sm">
-                              <label>Country</label>
-                              <div className="select-custom">
-                                <select className="form-control form-control-sm">
-                                  <option value="USA">United States</option>
-                                  <option value="Turkey">Turkey</option>
-                                  <option value="China">China</option>
-                                  <option value="Germany">Germany</option>
-                                </select>
-                              </div>
-                            </div>
-
-                            <div className="form-group form-group-sm">
-                              <label>State/Province</label>
-                              <div className="select-custom">
-                                <select className="form-control form-control-sm">
-                                  <option value="CA">California</option>
-                                  <option value="TX">Texas</option>
-                                </select>
-                              </div>
-                            </div>
-
-                            <div className="form-group form-group-sm">
-                              <label>Zip/Postal Code</label>
-                              <input
-                                type="text"
-                                className="form-control form-control-sm"
-                              />
-                            </div>
-
-                            <div className="form-group form-group-custom-control">
-                              <label>Flat Way</label>
-                              <div className="custom-control custom-checkbox">
-                                <input
-                                  type="checkbox"
-                                  className="custom-control-input"
-                                  id="flat-rate"
-                                />
-                                <label
-                                  className="custom-control-label"
-                                  htmlFor="flat-rate"
-                                >
-                                  Fixed $5.00
-                                </label>
-                              </div>
-                            </div>
-
-                            <div className="form-group form-group-custom-control">
-                              <label>Best Rate</label>
-                              <div className="custom-control custom-checkbox">
-                                <input
-                                  type="checkbox"
-                                  className="custom-control-input"
-                                  id="best-rate"
-                                />
-                                <label
-                                  className="custom-control-label"
-                                  htmlFor="best-rate"
-                                >
-                                  Table Rate $15.00
-                                </label>
-                              </div>
-                            </div>
-                          </form>
-                        </div>
-                      </div>
-                    )}
-                  </SlideToggle>
-
                   <table className="table table-totals">
                     <tbody>
                       <tr>
@@ -375,21 +221,9 @@ function ShoppingCart() {
             </div>
           )}
         </div>
-
         <div className="mb-6"></div>
       </div>
     </>
   );
 }
-
-const getCartTotal = (items) => {
-  let total = 0;
-  if (items) {
-    for (let i = 0; i < items.length; i++) {
-      total += parseInt(items[i].sum, 10);
-    }
-  }
-  return total;
-};
-
 export default withAuthCheck(ShoppingCart);
