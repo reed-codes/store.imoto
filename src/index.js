@@ -65,13 +65,13 @@ export function Root() {
         console.log("authRedirectPayload", authRedirectPayload)
         console.log(` authRedirectPayload.hash.includes("access_token")`, authRedirectPayload.hash.includes("access_token"))
         
-        // if (
-        //   window.location.origin !== authState.sourceURL &&
-        //   authRedirectPayload.hash.includes("access_token")
-        // ) {
-        //   console.log("WILL NOW REDIRECT TO SELLER WEBSITEE URL");
-        //   window.location.replace(sellerWebsiteURL);
-        // }
+        if (
+          window.location.origin !== authState.sourceURL &&
+          authRedirectPayload.hash.includes("access_token")
+        ) {
+          console.log("WILL NOW REDIRECT TO SELLER WEBSITEE URL");
+          window.location.replace(sellerWebsiteURL);
+        }
 
         break;
     }
