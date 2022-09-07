@@ -57,15 +57,21 @@ export function Root() {
           localStorage.getItem("redirect-payload")
         );
         const sellerWebsiteURL = `${authState.sourceURL}/${authRedirectPayload.hash}`;
-        console.log("SELLER WEBSITE URL", sellerWebsiteURL);
 
-        if (
-          window.location.origin !== authState.sourceURL &&
-          authRedirectPayload.hash.includes("access_token")
-        ) {
-          console.log("WILL NOW REDIRECT TO SELLER WEBSITEE URL");
-          window.location.replace(sellerWebsiteURL);
-        }
+        console.log("SELLER WEBSITE URL", sellerWebsiteURL);
+        console.log("window.location.origin", window.location.origin)
+        console.log("authState.sourceURL", authState.sourceURL)
+        console.log("window.location.origin !== authState.sourceURL", window.location.origin !== authState.sourceURL)
+        console.log("authRedirectPayload", authRedirectPayload)
+        console.log(` authRedirectPayload.hash.includes("access_token")`, authRedirectPayload.hash.includes("access_token"))
+        
+        // if (
+        //   window.location.origin !== authState.sourceURL &&
+        //   authRedirectPayload.hash.includes("access_token")
+        // ) {
+        //   console.log("WILL NOW REDIRECT TO SELLER WEBSITEE URL");
+        //   window.location.replace(sellerWebsiteURL);
+        // }
 
         break;
     }
