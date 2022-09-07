@@ -52,10 +52,10 @@ export function Root() {
         break;
 
       case "customOAuthState":
-        // const authState = JSON.parse(data);
-        // const authRedirectPayload = JSON.parse(
-        //   localStorage.getItem("redirect-payload")
-        // );
+        const authState = JSON.parse(data);
+        const authRedirectPayload = JSON.parse(
+          localStorage.getItem("redirect-payload")
+        );
         const sellerWebsiteURL = `${authState.sourceURL}/${authRedirectPayload.hash}`;
         console.log("sellerWebsiteURL", sellerWebsiteURL);
 
