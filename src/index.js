@@ -56,8 +56,7 @@ export function Root() {
         // const authRedirectPayload = JSON.parse(
         //   localStorage.getItem("redirect-payload")
         // );
-        // const sellerWebsiteURL = `${authState.sourceURL}/${authRedirectPayload.hash}`;
-
+        const sellerWebsiteURL = `${authState.sourceURL}/${authRedirectPayload.hash}`;
         console.log("sellerWebsiteURL", sellerWebsiteURL);
 
         // if (authRedirectPayload.hash.includes("access_token")) {
