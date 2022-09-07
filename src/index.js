@@ -64,7 +64,7 @@ export function Root() {
           authRedirectPayload.hash.includes("access_token")
         ) {
           console.log("WILL NOW REDIRECT TO SELLER WEBSITEE URL");
-          window.location.reload(sellerWebsiteURL);
+          window.location.replace(sellerWebsiteURL);
         }
 
         break;
