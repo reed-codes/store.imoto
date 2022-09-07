@@ -57,7 +57,11 @@ export function Root() {
           localStorage.getItem("redirect-payload")
         );
         const sellerWebsiteURL = `${authState.sourceURL}/${authRedirectPayload.hash}`;
-        console.log("sellerWebsiteURL", sellerWebsiteURL);
+        console.log("SELLER WEBSITE URL", sellerWebsiteURL);
+
+        if(window.location.origin !== authState.sourceURL){
+          console.log("WILL NOW REDIRECT TO SELLER WEBSITEE URL")
+        }
 
         // if (authRedirectPayload.hash.includes("access_token")) {
         //   window.location.reload(sellerWebsiteURL);

@@ -101,8 +101,7 @@ const SigninModal = (props) => {
 
       await Auth.federatedSignIn({
         provider: method,
-        // customState: JSON.stringify({sourceURL: window.location.origin}),
-        customState: JSON.stringify({sourceURL: "https://store.imoto.parts"}),
+        customState: JSON.stringify({sourceURL: window.location.origin}),
       });
     } catch (error) {
       localStorage.removeItem("REQUESTED-PATH");
